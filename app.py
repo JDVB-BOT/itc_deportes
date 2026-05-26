@@ -10,12 +10,19 @@ from data import (
     enf_limpio,
 )
 
-st.set_page_config(page_title="ITC Deportes", page_icon="static/logo_itc.png", layout="wide")
+st.set_page_config(
+    page_title="ITC Deportes",
+    page_icon="⚽",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
 
+# ── Session state ──────────────────────────────────────────────────────────────
 for k, v in [("rol","invitado"),("usuario",None),("tema","oscuro")]:
     if k not in st.session_state:
         st.session_state[k] = v
 
+# ── Temas ──────────────────────────────────────────────────────────────────────
 TEMAS = {
     "oscuro": dict(
         ac="#D4A017", achi="#FFD040", bg="#0A0A0A",
@@ -40,60 +47,197 @@ def css():
     t = T()
     st.markdown(f"""<style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;600;700&display=swap');
-html,body,[class*="css"]{{font-family:'Barlow',sans-serif;background:{t['bg']} !important;color:{t['tx']} !important;}}
+
+/* ── Base ─────────────────────────────────────────────────── */
+html,body,[class*="css"]{{
+    font-family:'Barlow',sans-serif;
+    background:{t['bg']} !important;
+    color:{t['tx']} !important;
+}}
 [data-testid="stAppViewContainer"]{{background:{t['bg']} !important;}}
-[data-testid="stSidebar"]{{background:{t['sbg']} !important;border-right:1px solid {t['bgc']};}}
+.block-container{{padding-top:1.5rem !important;padding-bottom:2rem !important;}}
+
+/* ── Sidebar ──────────────────────────────────────────────── */
+[data-testid="stSidebar"]{{
+    background:{t['sbg']} !important;
+    border-right:1px solid {t['bgc']};
+    min-width:240px !important;
+}}
 [data-testid="stSidebar"] *{{color:{t['tx2']} !important;}}
-[data-testid="stSidebar"] h2{{color:{t['ac']} !important;font-size:1.3rem;}}
-.stTabs [data-baseweb="tab-list"]{{background:{t['bgc']};border-radius:8px;padding:4px;gap:4px;}}
-.stTabs [data-baseweb="tab"]{{background:transparent;color:{t['tx2']} !important;border-radius:6px;padding:8px 16px;font-weight:600;}}
-.stTabs [aria-selected="true"]{{background:{t['ac']} !important;color:{t['bfg']} !important;}}
-.stExpander{{background:{t['bgc']} !important;border:1px solid {t['bga']} !important;border-radius:8px !important;}}
-.stExpander summary{{color:{t['ac']} !important;font-weight:700 !important;}}
-.stSelectbox>div>div,.stTextInput>div>div>input,.stNumberInput>div>div>input{{
-    background:{t['bga']} !important;color:{t['tx']} !important;
-    border-color:{t['bgc']} !important;border-radius:6px !important;}}
-.stButton>button{{background:{t['ac']} !important;color:{t['bfg']} !important;
-    font-weight:700 !important;border:none !important;border-radius:6px !important;padding:8px 20px !important;}}
-.stButton>button:hover{{background:{t['achi']} !important;}}
+[data-testid="stSidebar"] h2{{color:{t['ac']} !important;font-size:1.2rem;}}
+
+/* Botón de abrir sidebar — hacerlo más visible en móvil */
+[data-testid="collapsedControl"]{{
+    background:{t['ac']} !important;
+    border-radius:0 8px 8px 0 !important;
+    padding:8px 6px !important;
+    top:60px !important;
+    box-shadow:2px 2px 8px rgba(0,0,0,0.5) !important;
+}}
+[data-testid="collapsedControl"] svg{{
+    fill:{t['bfg']} !important;
+    width:20px !important;height:20px !important;
+}}
+
+/* ── Tabs ─────────────────────────────────────────────────── */
+.stTabs [data-baseweb="tab-list"]{{
+    background:{t['bgc']};
+    border-radius:10px;padding:4px;gap:4px;
+    overflow-x:auto;-webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+}}
+.stTabs [data-baseweb="tab-list"]::-webkit-scrollbar{{display:none;}}
+.stTabs [data-baseweb="tab"]{{
+    background:transparent;color:{t['tx2']} !important;
+    border-radius:7px;padding:9px 16px;
+    font-weight:600;white-space:nowrap;font-size:0.88rem;
+    transition:all 0.15s;
+}}
+.stTabs [aria-selected="true"]{{
+    background:{t['ac']} !important;color:{t['bfg']} !important;
+    font-weight:700 !important;
+}}
+
+/* ── Expander ─────────────────────────────────────────────── */
+.stExpander{{
+    background:{t['bgc']} !important;
+    border:1px solid {t['bga']} !important;
+    border-radius:10px !important;
+}}
+.stExpander summary{{
+    color:{t['ac']} !important;font-weight:700 !important;
+    font-size:0.95rem !important;
+}}
+
+/* ── Inputs ───────────────────────────────────────────────── */
+.stSelectbox>div>div,
+.stTextInput>div>div>input,
+.stNumberInput>div>div>input{{
+    background:{t['bga']} !important;
+    color:{t['tx']} !important;
+    border:1px solid {t['bgc']} !important;
+    border-radius:8px !important;
+    font-size:0.95rem !important;
+    min-height:42px !important;
+}}
+.stSelectbox label,.stTextInput label,.stNumberInput label{{
+    color:{t['tx2']} !important;
+    font-size:0.82rem !important;
+    font-weight:600 !important;
+    letter-spacing:0.5px !important;
+}}
+
+/* ── Botones ──────────────────────────────────────────────── */
+.stButton>button{{
+    background:{t['ac']} !important;
+    color:{t['bfg']} !important;
+    font-weight:700 !important;
+    border:none !important;
+    border-radius:8px !important;
+    padding:10px 20px !important;
+    width:100% !important;
+    font-size:0.95rem !important;
+    min-height:44px !important;
+    transition:all 0.15s !important;
+}}
+.stButton>button:hover{{
+    background:{t['achi']} !important;
+    transform:translateY(-1px);
+    box-shadow:0 4px 12px rgba(0,0,0,0.3) !important;
+}}
+.stButton>button:active{{transform:translateY(0) !important;}}
+
+/* ── Texto ────────────────────────────────────────────────── */
 div[data-testid="stMarkdownContainer"] p{{color:{t['tx']} !important;}}
+h1,h2,h3{{word-break:break-word;}}
+
+/* ── Radio ────────────────────────────────────────────────── */
+.stRadio>div>label{{
+    color:{t['tx2']} !important;
+    font-size:0.9rem !important;
+}}
+
+/* ── Info / Warning / Success ─────────────────────────────── */
+.stAlert{{border-radius:8px !important;}}
+
+/* ── Móvil: pantallas ≤ 768px ─────────────────────────────── */
+@media (max-width:768px){{
+    .block-container{{
+        padding-left:0.6rem !important;
+        padding-right:0.6rem !important;
+        padding-top:1rem !important;
+    }}
+    /* Tabla scroll horizontal */
+    table{{
+        display:block;
+        overflow-x:auto;
+        -webkit-overflow-scrolling:touch;
+        white-space:nowrap;
+        font-size:0.8rem !important;
+    }}
+    /* Cards de partido se apilan */
+    .partido-flex{{flex-direction:column !important;gap:8px !important;}}
+    /* Títulos más compactos */
+    h2{{font-size:1.25rem !important;}}
+    h3{{font-size:1.05rem !important;}}
+    /* Tabs más compactos */
+    .stTabs [data-baseweb="tab"]{{
+        padding:7px 10px !important;
+        font-size:0.78rem !important;
+    }}
+    /* Hint de sidebar */
+    .sidebar-hint{{display:flex !important;}}
+}}
+@media (min-width:769px){{
+    .sidebar-hint{{display:none !important;}}
+}}
 </style>""", unsafe_allow_html=True)
+
 css()
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+# ── Hint móvil — indica cómo abrir el menú ────────────────────────────────────
+st.markdown(f"""
+<div class="sidebar-hint" style="display:none;
+     background:{T()['ac']};color:{T()['bfg']};
+     padding:10px 16px;border-radius:8px;margin-bottom:12px;
+     align-items:center;gap:10px;font-weight:700;font-size:0.9rem;">
+  <span style="font-size:1.4rem;">☰</span>
+  <span>Toca el botón <b style="background:rgba(0,0,0,0.2);padding:2px 8px;border-radius:4px;">☰</b> arriba a la izquierda para abrir el menú de navegación</span>
+</div>
+""", unsafe_allow_html=True)
+
+# ── Helpers ────────────────────────────────────────────────────────────────────
 def badge(estado):
     if estado == "Finalizado":
-        return '<span style="background:#1A6020;color:#90FF90;padding:3px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;">✓ Finalizado</span>'
+        return '<span style="background:#1A6020;color:#90FF90;padding:4px 12px;border-radius:20px;font-size:0.78rem;font-weight:700;white-space:nowrap;">✓ Finalizado</span>'
     if estado == "Pendiente":
-        return f'<span style="background:{T()["bgs"]};color:{T()["ac"]};padding:3px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;border:1px solid {T()["ac"]};">⏳ Pendiente</span>'
-    return '<span style="background:#3A0A0A;color:#FFB0B0;padding:3px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;">✗ Aplazado</span>'
+        return f'<span style="background:{T()["bgs"]};color:{T()["ac"]};padding:4px 12px;border-radius:20px;font-size:0.78rem;font-weight:700;border:1px solid {T()["ac"]};white-space:nowrap;">⏳ Pendiente</span>'
+    return '<span style="background:#3A0A0A;color:#FFB0B0;padding:4px 12px;border-radius:20px;font-size:0.78rem;font-weight:700;white-space:nowrap;">✗ Aplazado</span>'
 
 def card_partido(enf, hora, estado, g1=0, g2=0):
-    m = f'<span style="background:{T()["ac"]};color:{T()["bfg"]};padding:5px 14px;border-radius:6px;font-weight:700;font-family:monospace;">{g1} — {g2}</span>' if estado=="Finalizado" else ""
+    marcador = f'<span style="background:{T()["ac"]};color:{T()["bfg"]};padding:5px 14px;border-radius:6px;font-weight:700;font-family:monospace;font-size:1.05rem;">{g1} — {g2}</span>' if estado=="Finalizado" else ""
     return f"""<div style="background:{T()['bgc']};border-left:4px solid {T()['ac']};
-         border-radius:0 8px 8px 0;padding:12px 18px;margin-bottom:8px;
-         display:flex;align-items:center;justify-content:space-between;">
-  <div>
-    <div style="font-weight:700;color:{T()['tx']};font-size:0.95rem;margin-bottom:2px;">{enf}</div>
+         border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:8px;">
+  <div style="font-weight:700;color:{T()['tx']};font-size:0.92rem;margin-bottom:6px;line-height:1.4;">{enf}</div>
+  <div class="partido-flex" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
     <div style="color:{T()['tx3']};font-size:0.8rem;">🕐 {hora}</div>
+    <div style="display:flex;align-items:center;gap:8px;">{marcador}{badge(estado)}</div>
   </div>
-  <div style="display:flex;align-items:center;gap:10px;">{m}{badge(estado)}</div>
 </div>"""
 
 def lbl_sec(txt):
-    return f'<div style="font-size:0.7rem;font-weight:700;letter-spacing:2px;color:{T()["tx3"]};text-transform:uppercase;margin-bottom:10px;">{txt}</div>'
+    return f'<div style="font-size:0.7rem;font-weight:700;letter-spacing:2px;color:{T()["tx3"]};text-transform:uppercase;margin:16px 0 10px;padding-left:2px;">{txt}</div>'
 
 def dep_badge(dep):
-    ico = ICONOS_DEP.get(dep, "🏅")
-    return f'<span style="background:{T()["ac"]};color:{T()["bfg"]};padding:4px 14px;border-radius:20px;font-weight:700;font-size:0.85rem;">{ico} {dep}</span>'
+    return f'<span style="background:{T()["ac"]};color:{T()["bfg"]};padding:4px 14px;border-radius:20px;font-weight:700;font-size:0.85rem;">{ICONOS_DEP.get(dep,"🏅")} {dep}</span>'
 
 def render_tabla(categoria, deporte):
     tabla = calcular_tabla(categoria, deporte)
     if not tabla:
         st.info("Sin datos. Añade equipos y realiza el sorteo.")
         return
-    TH = f"background:{T()['ac']};color:{T()['bfg']};padding:10px 12px;text-align:center;font-size:0.78rem;font-weight:700;letter-spacing:1px;"
-    TD = f"padding:10px 12px;border-bottom:1px solid {T()['bga']};text-align:center;font-size:0.88rem;"
+    TH = f"background:{T()['ac']};color:{T()['bfg']};padding:10px 10px;text-align:center;font-size:0.76rem;font-weight:700;white-space:nowrap;"
+    TD = f"padding:10px 10px;border-bottom:1px solid {T()['bga']};text-align:center;font-size:0.85rem;white-space:nowrap;"
     MEDALLAS = {1:"🥇",2:"🥈",3:"🥉"}
     filas = ""
     for r in tabla:
@@ -109,8 +253,8 @@ def render_tabla(categoria, deporte):
         fw    = '700' if pos<=3 else '400'
         filas += f"""<tr>
           <td style="{TD}background:{pbg};color:{pfg};font-weight:700;font-size:1rem;">{med}</td>
-          <td style="{TD}background:{rbg};text-align:left;padding-left:14px;font-weight:{fw};color:{eq_c};">{r['Equipo']}</td>
-          <td style="{TD}background:{rbg};color:{T()['tx3']};font-size:0.8rem;">{r['Curso']}</td>
+          <td style="{TD}background:{rbg};text-align:left;padding-left:12px;font-weight:{fw};color:{eq_c};max-width:130px;overflow:hidden;text-overflow:ellipsis;">{r['Equipo']}</td>
+          <td style="{TD}background:{rbg};color:{T()['tx3']};font-size:0.76rem;">{r['Curso']}</td>
           <td style="{TD}background:{rbg};">{r['PJ']}</td>
           <td style="{TD}background:{rbg};color:#90FF90;font-weight:600;">{r['PG']}</td>
           <td style="{TD}background:{rbg};color:#FFE060;">{r['PE']}</td>
@@ -118,30 +262,36 @@ def render_tabla(categoria, deporte):
           <td style="{TD}background:{rbg};color:{T()['tx2']};">{r['GF']}</td>
           <td style="{TD}background:{rbg};color:{T()['tx2']};">{r['GC']}</td>
           <td style="{TD}background:{rbg};color:{dg_c};font-weight:600;">{dg}</td>
-          <td style="{TD}background:{rbg};color:{pts_c};font-weight:700;">{r['Pts']}</td>
+          <td style="{TD}background:{rbg};color:{pts_c};font-weight:700;font-size:1rem;">{r['Pts']}</td>
         </tr>"""
-    st.markdown(f"""<div style="border-radius:10px;overflow:hidden;border:1px solid {T()['bga']};margin-top:8px;">
-    <table style="width:100%;border-collapse:collapse;">
+    st.markdown(f"""
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:10px;border:1px solid {T()['bga']};">
+    <table style="width:100%;border-collapse:collapse;min-width:520px;">
       <thead><tr>
         <th style="{TH}">#</th>
-        <th style="{TH}text-align:left;padding-left:14px;">Equipo</th>
+        <th style="{TH}text-align:left;padding-left:12px;">Equipo</th>
         <th style="{TH}">Curso</th><th style="{TH}">PJ</th><th style="{TH}">PG</th>
         <th style="{TH}">PE</th><th style="{TH}">PP</th><th style="{TH}">GF</th>
         <th style="{TH}">GC</th><th style="{TH}">DG</th><th style="{TH}">Pts</th>
       </tr></thead><tbody>{filas}</tbody>
     </table></div>
-    <div style="margin-top:8px;color:{T()['tx3']};font-size:0.8rem;">
-      ⚽ Victoria = 3 pts &nbsp;&nbsp; 🤝 Empate = 1 pt &nbsp;&nbsp; ❌ Derrota = 0 pts
+    <div style="margin-top:8px;color:{T()['tx3']};font-size:0.78rem;">
+      ⚽ Victoria=3pts &nbsp;·&nbsp; 🤝 Empate=1pt &nbsp;·&nbsp; ❌ Derrota=0pts
     </div>""", unsafe_allow_html=True)
 
-# ── Sidebar ───────────────────────────────────────────────────────────────────
+# ── Sidebar ────────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("## ⚽ ITC Deportes")
     st.markdown("---")
+
+    # Toggle tema
     if st.button(f"{T()['ico']} {T()['lbl']}", key="btn_tema"):
         st.session_state.tema = "verde" if st.session_state.tema == "oscuro" else "oscuro"
         st.rerun()
+
     st.markdown("---")
+
+    # Login
     if st.session_state.rol == "invitado":
         st.markdown("**👤 Modo Invitado**")
         with st.expander("🔐 Iniciar sesión"):
@@ -149,69 +299,97 @@ with st.sidebar:
             pwd  = st.text_input("Contraseña", type="password", key="sb_pwd")
             if st.button("Entrar", key="btn_login"):
                 if user in USUARIOS and USUARIOS[user] == pwd and USUARIOS_TIPO.get(user) == "profesor":
-                    st.session_state.rol = "profesor"
+                    st.session_state.rol     = "profesor"
                     st.session_state.usuario = user
-                    # Sin rerun — se queda en la misma posición
                 else:
                     st.error("Credenciales incorrectas.")
     else:
         st.markdown(f"**★ {st.session_state.usuario.upper()}**")
-        st.caption("Profesor")
+        st.caption("Profesor · Sesión activa")
         if st.button("Cerrar sesión", key="btn_logout"):
-            st.session_state.rol = "invitado"
+            st.session_state.rol     = "invitado"
             st.session_state.usuario = None
+            st.rerun()
+
     st.markdown("---")
-    torneo = st.radio("Torneo", ["🏆 Intercolegiados","🎯 Intercursos"], key="torneo_sel")
+
+    # Selección de torneo
+    st.markdown("**📍 Sección**")
+    torneo = st.radio(
+        "torneo",
+        ["🏆 Intercolegiados", "🎯 Intercursos"],
+        key="torneo_sel",
+        label_visibility="collapsed",
+    )
+
     if torneo == "🎯 Intercursos":
-        st.markdown("**Categoría**")
-        categoria = st.radio("cat", ["PRIMERA","SEGUNDA","TERCERA"],
-                             label_visibility="collapsed", key="cat_sel")
-        st.caption({"PRIMERA":"Grados 6° y 7°","SEGUNDA":"Grados 8° y 9°","TERCERA":"Grados 10° y 11°"}.get(categoria,""))
-        st.markdown("**Deporte**")
-        dep_raw = st.radio("dep", [f"{ICONOS_DEP.get(d,'🏅')} {d}" for d in DEPORTES],
-                           label_visibility="collapsed", key="dep_sel")
-        deporte = dep_raw.split(" ",1)[1] if " " in dep_raw else dep_raw
+        st.markdown("---")
+        st.markdown("**📂 Categoría**")
+        categoria = st.radio(
+            "cat",
+            ["PRIMERA", "SEGUNDA", "TERCERA"],
+            label_visibility="collapsed",
+            key="cat_sel",
+            captions=["Grados 6° y 7°", "Grados 8° y 9°", "Grados 10° y 11°"],
+        )
+        st.markdown("**🏅 Deporte**")
+        dep_raw = st.radio(
+            "dep",
+            [f"{ICONOS_DEP.get(d,'🏅')} {d}" for d in DEPORTES],
+            label_visibility="collapsed",
+            key="dep_sel",
+        )
+        deporte = dep_raw.split(" ", 1)[1] if " " in dep_raw else dep_raw
     else:
         categoria = None
         deporte   = None
 
-# ── Hero ──────────────────────────────────────────────────────────────────────
-st.markdown(f"""<div style="background:{T()['grad']};border-left:6px solid {T()['ac']};
-     padding:26px 36px;margin-bottom:24px;border-radius:0 12px 12px 0;">
-  <div style="font-family:'Bebas Neue',Impact,sans-serif;font-size:3rem;
-              color:{T()['ac']};letter-spacing:5px;">ITC DEPORTES</div>
-  <div style="color:{T()['tx2']};font-size:0.9rem;margin-top:4px;">Sistema de gestión deportiva · 2026</div>
+# ── Hero ───────────────────────────────────────────────────────────────────────
+st.markdown(f"""
+<div style="background:{T()['grad']};border-left:6px solid {T()['ac']};
+     padding:20px 24px;margin-bottom:20px;border-radius:0 12px 12px 0;">
+  <div style="font-family:'Bebas Neue',Impact,sans-serif;font-size:2.6rem;
+              color:{T()['ac']};letter-spacing:4px;line-height:1.1;">ITC DEPORTES</div>
+  <div style="color:{T()['tx2']};font-size:0.85rem;margin-top:4px;">
+    Sistema de gestión deportiva · 2026
+  </div>
 </div>""", unsafe_allow_html=True)
 
-# ═════════════════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
 #  INTERCOLEGIADOS
-# ═════════════════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
 if torneo == "🏆 Intercolegiados":
-    st.markdown(f"<h2 style='color:{T()['ac']};'>🏆 Intercolegiados ITC</h2>", unsafe_allow_html=True)
+    st.markdown(f"<h2 style='color:{T()['ac']};margin-bottom:16px;'>🏆 Intercolegiados ITC</h2>",
+                unsafe_allow_html=True)
+
     tabs = st.tabs([f"{ICONOS_DEP[d]} {d}" for d in DEPORTES])
     for i, dep in enumerate(DEPORTES):
         with tabs[i]:
-            c1, c2 = st.columns(2)
+            c1, c2 = st.columns([1,1], gap="medium")
+
             with c1:
-                st.markdown(lbl_sec("Logros destacados"), unsafe_allow_html=True)
+                st.markdown(lbl_sec("🏅 Logros destacados"), unsafe_allow_html=True)
                 logros = [[lid,a,d] for lid,a,d in obtener_logros() if dep in d]
                 if logros:
                     for lid, anio, desc in logros:
                         col_l, col_x = st.columns([11, 1])
                         with col_l:
-                            st.markdown(f"""<div style="display:flex;align-items:center;gap:12px;
+                            st.markdown(f"""
+                            <div style="display:flex;align-items:center;gap:10px;
                                  background:{T()['bgc']};border-left:3px solid {T()['ac']};
-                                 padding:10px 16px;margin-bottom:4px;border-radius:0 8px 8px 0;">
-                              <span style="background:{T()['ac']};color:{T()['bfg']};padding:3px 10px;
-                                    border-radius:20px;font-weight:700;font-size:0.85rem;white-space:nowrap;">{anio}</span>
-                              <span style="color:{T()['tx']};font-size:0.9rem;">{desc}</span>
+                                 padding:10px 14px;margin-bottom:6px;border-radius:0 8px 8px 0;">
+                              <span style="background:{T()['ac']};color:{T()['bfg']};
+                                    padding:3px 10px;border-radius:20px;font-weight:700;
+                                    font-size:0.82rem;white-space:nowrap;">{anio}</span>
+                              <span style="color:{T()['tx']};font-size:0.88rem;line-height:1.3;">{desc}</span>
                             </div>""", unsafe_allow_html=True)
                         with col_x:
                             if st.session_state.rol == "profesor":
-                                if st.button("✕", key=f"xl_{lid}", help="Eliminar"):
+                                if st.button("✕", key=f"xl_{lid}", help="Eliminar logro"):
                                     eliminar_logro(lid); st.rerun()
                 else:
                     st.info("Sin logros registrados.")
+
                 if st.session_state.rol == "profesor":
                     with st.expander("➕ Añadir logro"):
                         a_n = st.text_input("Año", key=f"la_{dep}")
@@ -220,9 +398,11 @@ if torneo == "🏆 Intercolegiados":
                             if a_n and d_n:
                                 agregar_logro(a_n, f"{dep} - {d_n}")
                                 st.success("✅ Logro añadido."); st.rerun()
-                            else: st.warning("Completa año y descripción.")
+                            else:
+                                st.warning("Completa año y descripción.")
+
             with c2:
-                st.markdown(lbl_sec("Partidos programados"), unsafe_allow_html=True)
+                st.markdown(lbl_sec("📅 Partidos programados"), unsafe_allow_html=True)
                 partidos_i = obtener_partidos_inter(dep)
                 if partidos_i:
                     for pid, fecha, enf, estado in partidos_i:
@@ -235,6 +415,7 @@ if torneo == "🏆 Intercolegiados":
                                     eliminar_partido_inter(pid); st.rerun()
                 else:
                     st.info("Sin partidos programados.")
+
                 if st.session_state.rol == "profesor":
                     with st.expander("➕ Añadir partido"):
                         f_p = st.text_input("Fecha (AAAA-MM-DD)", key=f"pf_{dep}")
@@ -244,34 +425,45 @@ if torneo == "🏆 Intercolegiados":
                             if f_p and e_p:
                                 agregar_partido_inter(dep, f_p, e_p, s_p)
                                 st.success("✅ Partido añadido."); st.rerun()
-                            else: st.warning("Completa fecha y enfrentamiento.")
+                            else:
+                                st.warning("Completa fecha y enfrentamiento.")
 
-# ═════════════════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
 #  INTERCURSOS
-# ═════════════════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
 else:
-    st.markdown(f"<h2 style='color:{T()['ac']};'>🎯 Intercursos — {categoria}</h2>", unsafe_allow_html=True)
-    st.markdown(f"<p style='color:{T()['tx3']};margin-top:-12px;'>{'Grados 6° y 7°' if categoria=='PRIMERA' else 'Grados 8° y 9°' if categoria=='SEGUNDA' else 'Grados 10° y 11°'} &nbsp;·&nbsp; {ICONOS_DEP.get(deporte,'')} {deporte}</p>", unsafe_allow_html=True)
+    cat_info = {"PRIMERA":"Grados 6° y 7°","SEGUNDA":"Grados 8° y 9°","TERCERA":"Grados 10° y 11°"}
+    st.markdown(f"""
+    <div style="margin-bottom:16px;">
+      <h2 style="color:{T()['ac']};margin:0;font-size:1.6rem;">
+        🎯 {ICONOS_DEP.get(deporte,'')} {deporte}
+      </h2>
+      <div style="color:{T()['tx3']};font-size:0.85rem;margin-top:4px;">
+        Categoría {categoria} · {cat_info.get(categoria,'')}
+      </div>
+    </div>""", unsafe_allow_html=True)
 
+    # ── Panel profesor ─────────────────────────────────────────────────────────
     if st.session_state.rol == "profesor":
         with st.expander("⚙️ Panel de Gestión — Profesor", expanded=False):
             ptabs = st.tabs(["➕ Equipo","👤 Jugador","✏️ Partido","🎲 Sorteo"])
 
-            # ── EQUIPO ────────────────────────────────────────────────────────
+            # EQUIPO ────────────────────────────────────────────────────────────
             with ptabs[0]:
-                # Deporte fijo = el del sidebar
-                st.markdown(f"Deporte activo: {dep_badge(deporte)}", unsafe_allow_html=True)
+                st.markdown(f"**Deporte activo:** {dep_badge(deporte)}", unsafe_allow_html=True)
                 st.markdown("---")
                 st.markdown("**Añadir equipo**")
                 cur_ae = st.selectbox("Curso", CATEGORIAS_LOCAL.get(categoria,[]), key="ae_cur")
-                nom_ae = st.text_input("Nombre del equipo", key="ae_nom")
-                if st.button("Añadir equipo", key="ae_btn"):
+                nom_ae = st.text_input("Nombre del equipo", key="ae_nom",
+                                       placeholder="Ej: Halcones FC")
+                if st.button("➕ Añadir equipo", key="ae_btn"):
                     nom = nom_ae.strip()
                     if nom:
                         err = agregar_equipo(categoria, deporte, cur_ae, nom)
                         if err: st.error(err)
-                        else:   st.success(f"✅ Equipo '{nom}' añadido al curso {cur_ae}."); st.rerun()
+                        else:   st.success(f"✅ '{nom}' añadido al curso {cur_ae}."); st.rerun()
                     else: st.warning("Ingresa un nombre.")
+
                 st.markdown("---")
                 st.markdown("**Eliminar equipo**")
                 eqs_de = obtener_equipos(categoria, deporte)
@@ -281,16 +473,16 @@ else:
                     lista_de = eqs_de.get(cur_de, [])
                     if lista_de:
                         eq_de = st.selectbox("Equipo a eliminar", lista_de, key="de_eq")
-                        st.warning(f"⚠️ Eliminará '{eq_de}' y todos sus jugadores.")
+                        st.warning(f"⚠️ Se eliminará '{eq_de}' y todos sus jugadores.")
                         if st.button("🗑️ Eliminar equipo", key="de_btn"):
                             eliminar_equipo(categoria, deporte, cur_de, eq_de)
                             st.success(f"✅ '{eq_de}' eliminado."); st.rerun()
                     else: st.info("No hay equipos en ese curso.")
                 else: st.info("No hay equipos registrados para este deporte.")
 
-            # ── JUGADOR ───────────────────────────────────────────────────────
+            # JUGADOR ───────────────────────────────────────────────────────────
             with ptabs[1]:
-                st.markdown(f"Deporte activo: {dep_badge(deporte)}", unsafe_allow_html=True)
+                st.markdown(f"**Deporte activo:** {dep_badge(deporte)}", unsafe_allow_html=True)
                 st.markdown("---")
                 st.markdown("**Añadir jugador**")
                 eqs_aj = obtener_equipos(categoria, deporte)
@@ -300,8 +492,9 @@ else:
                     lista_aj = eqs_aj.get(cur_aj, [])
                     if lista_aj:
                         eq_aj  = st.selectbox("Equipo", lista_aj, key="aj_eq")
-                        nom_aj = st.text_input("Nombre del jugador", key="aj_nom")
-                        if st.button("Añadir jugador", key="aj_btn"):
+                        nom_aj = st.text_input("Nombre del jugador", key="aj_nom",
+                                               placeholder="Ej: Juan García")
+                        if st.button("➕ Añadir jugador", key="aj_btn"):
                             nom = nom_aj.strip()
                             if nom:
                                 err = agregar_jugador(categoria, deporte, cur_aj, eq_aj, nom)
@@ -309,7 +502,8 @@ else:
                                 else:   st.success(f"✅ '{nom}' añadido a {eq_aj}."); st.rerun()
                             else: st.warning("Ingresa un nombre.")
                     else: st.info("No hay equipos en ese curso.")
-                else: st.info("No hay equipos registrados para este deporte.")
+                else: st.info("No hay equipos registrados.")
+
                 st.markdown("---")
                 st.markdown("**Eliminar jugador**")
                 eqs_dj = obtener_equipos(categoria, deporte)
@@ -330,38 +524,43 @@ else:
                                 st.success(f"✅ '{nom_sel}' eliminado."); st.rerun()
                         else: st.info("No hay jugadores en ese equipo.")
                     else: st.info("No hay equipos en ese curso.")
-                else: st.info("No hay equipos registrados para este deporte.")
+                else: st.info("No hay equipos registrados.")
 
-            # ── PARTIDO ───────────────────────────────────────────────────────
+            # PARTIDO ───────────────────────────────────────────────────────────
             with ptabs[2]:
-                st.markdown(f"Deporte activo: {dep_badge(deporte)}", unsafe_allow_html=True)
+                st.markdown(f"**Deporte activo:** {dep_badge(deporte)}", unsafe_allow_html=True)
                 st.markdown("---")
                 pl_dep = obtener_partidos(categoria, deporte)
                 if pl_dep:
-                    # Opciones limpias: solo nombre de equipos sin símbolos
-                    def opt_partido(i, p):
-                        limpio = enf_limpio(p[2])
-                        estado_icon = "✓" if p[3]=="Finalizado" else "⏳"
-                        return f"{estado_icon} J{i+1} · {p[1][:10]} | {limpio}"
+                    def opt_p(i, p):
+                        ico = "✓" if p[3]=="Finalizado" else "⏳"
+                        return f"{ico} J{i+1} · {p[1][:10]} | {enf_limpio(p[2])}"
 
-                    opts_p = [opt_partido(i, p) for i, p in enumerate(pl_dep)]
+                    opts_p = [opt_p(i, p) for i,p in enumerate(pl_dep)]
                     sel_p  = st.selectbox("Selecciona partido", opts_p, key="ap_sel")
                     idx_p  = opts_p.index(sel_p)
                     p_sel  = pl_dep[idx_p]
                     pid, fecha_p, enf_p, estado_p, g1_p, g2_p = p_sel
                     enf_show = enf_limpio(enf_p)
 
-                    # Card visual del partido
-                    st.markdown(f"""<div style="background:{T()['bgs']};border-left:4px solid {T()['ac']};
-                         padding:16px 20px;border-radius:0 8px 8px 0;margin:10px 0 16px;">
-                      <div style="font-weight:700;color:{T()['tx']};font-size:1.05rem;">{enf_show}</div>
-                      <div style="color:{T()['tx3']};font-size:0.82rem;margin-top:4px;">
-                        📅 {fecha_p[:10]} &nbsp;·&nbsp; Estado actual: <b style="color:{T()['ac']}">{estado_p}</b>
+                    # Card del partido seleccionado
+                    st.markdown(f"""
+                    <div style="background:{T()['bgs']};border-left:4px solid {T()['ac']};
+                         padding:14px 16px;border-radius:0 8px 8px 0;margin:10px 0 16px;">
+                      <div style="font-weight:700;color:{T()['tx']};font-size:0.95rem;line-height:1.4;">{enf_show}</div>
+                      <div style="color:{T()['tx3']};font-size:0.8rem;margin-top:4px;">
+                        📅 {fecha_p[:10]} &nbsp;·&nbsp;
+                        Estado actual: <b style="color:{T()['ac']}">{estado_p}</b>
                       </div>
                     </div>""", unsafe_allow_html=True)
 
-                    nuevo_est = st.selectbox("Nuevo estado", ["Pendiente","Finalizado"],
-                                              index=0 if estado_p=="Pendiente" else 1, key="ap_est")
+                    nuevo_est = st.selectbox(
+                        "Nuevo estado del partido",
+                        ["Pendiente","Finalizado"],
+                        index=0 if estado_p=="Pendiente" else 1,
+                        key="ap_est"
+                    )
+
                     g1, g2 = 0, 0
                     if nuevo_est == "Finalizado":
                         try:
@@ -371,33 +570,34 @@ else:
                         except Exception:
                             eq1_n, eq2_n = "Equipo 1", "Equipo 2"
 
-                        st.markdown(f"<p style='color:{T()['tx2']};font-size:0.85rem;margin-bottom:8px;'>Ingresa el marcador final:</p>", unsafe_allow_html=True)
-                        col1, col_vs, col2 = st.columns([5, 1, 5])
+                        st.markdown(f"<p style='color:{T()['tx2']};font-size:0.85rem;margin:8px 0 4px;font-weight:600;'>Marcador final</p>", unsafe_allow_html=True)
+                        col1, col_vs, col2 = st.columns([5,1,5])
                         with col1:
-                            st.markdown(f"<div style='background:{T()['bgc']};padding:8px 12px;border-radius:6px 6px 0 0;font-weight:700;color:{T()['ac']};text-align:center;'>{eq1_n[:22]}</div>", unsafe_allow_html=True)
-                            g1 = st.number_input("g1", min_value=0, value=0, key="ap_g1",
-                                                  label_visibility="collapsed")
+                            st.markdown(f"<div style='background:{T()['bgc']};padding:8px 12px;border-radius:6px 6px 0 0;font-weight:700;color:{T()['ac']};text-align:center;font-size:0.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>{eq1_n[:22]}</div>", unsafe_allow_html=True)
+                            g1 = st.number_input("g1", min_value=0, value=0,
+                                                  key="ap_g1", label_visibility="collapsed")
                         with col_vs:
-                            st.markdown(f"<div style='text-align:center;color:{T()['tx3']};font-weight:700;padding-top:36px;font-size:1.1rem;'>—</div>", unsafe_allow_html=True)
+                            st.markdown(f"<div style='text-align:center;color:{T()['tx3']};font-weight:700;padding-top:32px;font-size:1.1rem;'>—</div>", unsafe_allow_html=True)
                         with col2:
-                            st.markdown(f"<div style='background:{T()['bgc']};padding:8px 12px;border-radius:6px 6px 0 0;font-weight:700;color:{T()['ac']};text-align:center;'>{eq2_n[:22]}</div>", unsafe_allow_html=True)
-                            g2 = st.number_input("g2", min_value=0, value=0, key="ap_g2",
-                                                  label_visibility="collapsed")
+                            st.markdown(f"<div style='background:{T()['bgc']};padding:8px 12px;border-radius:6px 6px 0 0;font-weight:700;color:{T()['ac']};text-align:center;font-size:0.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>{eq2_n[:22]}</div>", unsafe_allow_html=True)
+                            g2 = st.number_input("g2", min_value=0, value=0,
+                                                  key="ap_g2", label_visibility="collapsed")
 
-                    if st.button("💾 Guardar resultado", key="ap_btn", use_container_width=True):
+                    if st.button("💾 Guardar resultado", key="ap_btn"):
                         actualizar_partido(pid, nuevo_est, int(g1), int(g2))
-                        resultado_txt = f" ({int(g1)}–{int(g2)})" if nuevo_est == "Finalizado" else ""
-                        st.success(f"✅ Guardado: {enf_show} → {nuevo_est}{resultado_txt}")
+                        res_txt = f" ({int(g1)}–{int(g2)})" if nuevo_est=="Finalizado" else ""
+                        st.success(f"✅ Guardado: {enf_show} → {nuevo_est}{res_txt}")
                         st.rerun()
                 else:
                     st.info("No hay partidos para este deporte. Realiza el sorteo primero.")
 
-            # ── SORTEO ────────────────────────────────────────────────────────
+            # SORTEO ────────────────────────────────────────────────────────────
             with ptabs[3]:
-                st.markdown(f"Deporte activo: {dep_badge(deporte)}", unsafe_allow_html=True)
+                st.markdown(f"**Deporte activo:** {dep_badge(deporte)}", unsafe_allow_html=True)
                 st.markdown("---")
                 key_s  = f"{categoria}_{deporte}"
                 sorteo = obtener_sorteo(key_s)
+
                 if sorteo:
                     st.info(f"✅ Sorteo activo: {sorteo['fecha'][:10]} · {sorteo['n_equipos']} equipos")
                     col_s1, col_s2 = st.columns(2)
@@ -408,79 +608,91 @@ else:
                             if error: st.error(error)
                             else:
                                 s2 = obtener_sorteo(key_s)
-                                st.success(f"✅ {s2['n_equipos']} equipos · 7 jornadas."); st.rerun()
+                                st.success(f"✅ {s2['n_equipos']} equipos · 7 jornadas.")
+                                st.rerun()
                     with col_s2:
                         if st.button("🗑️ Eliminar sorteo", key="del_sort_btn"):
                             eliminar_sorteo(categoria, deporte)
-                            st.success("✅ Sorteo, partidos y tabla eliminados."); st.rerun()
+                            st.success("✅ Sorteo y partidos eliminados.")
+                            st.rerun()
                 else:
-                    eqs_count = sum(len(v) for v in obtener_equipos(categoria, deporte).values())
-                    if eqs_count < 2:
-                        st.warning(f"⚠️ Solo hay {eqs_count} equipo(s) registrado(s). Añade al menos 2 en la pestaña Equipo.")
+                    n_eqs = sum(len(v) for v in obtener_equipos(categoria, deporte).values())
+                    if n_eqs < 2:
+                        st.warning(f"⚠️ Solo hay {n_eqs} equipo(s). Añade al menos 2 en la pestaña Equipo.")
                     else:
-                        st.markdown(f"**{eqs_count} equipos registrados.** Genera el fixture Round-Robin de 7 jornadas.")
-                    if st.button(f"🎲 Realizar sorteo", key="sort_btn"):
-                        with st.spinner("Generando fixture..."):
+                        st.success(f"✅ {n_eqs} equipos registrados. ¡Listo para sortear!")
+                    if st.button("🎲 Realizar sorteo", key="sort_btn"):
+                        with st.spinner("Generando fixture de 7 jornadas..."):
                             ok, error = realizar_sorteo(categoria, deporte)
                         if error: st.error(error)
                         else:
                             s2 = obtener_sorteo(key_s)
-                            st.success(f"✅ Sorteo listo. {s2['n_equipos']} equipos · 7 jornadas."); st.rerun()
+                            st.success(f"✅ Sorteo listo. {s2['n_equipos']} equipos · 7 jornadas.")
+                            st.rerun()
 
-    st.markdown(f'<hr style="height:2px;background:linear-gradient(90deg,{T()["ac"]},transparent);border:none;margin:16px 0;">', unsafe_allow_html=True)
+    st.markdown(f'<hr style="height:2px;background:linear-gradient(90deg,{T()["ac"]},transparent);border:none;margin:12px 0 16px;">', unsafe_allow_html=True)
 
+    # ── Vistas ─────────────────────────────────────────────────────────────────
     vista = st.tabs(["📊 Tabla", "📅 Partidos", "👥 Equipos"])
 
+    # TABLA ─────────────────────────────────────────────────────────────────────
     with vista[0]:
-        st.markdown(f"<h3 style='color:{T()['tx']};margin-bottom:12px;'>📊 {deporte} · {categoria}</h3>", unsafe_allow_html=True)
         render_tabla(categoria, deporte)
 
+    # PARTIDOS ──────────────────────────────────────────────────────────────────
     with vista[1]:
-        st.markdown(f"<h3 style='color:{T()['tx']};margin-bottom:12px;'>📅 {deporte} · {categoria}</h3>", unsafe_allow_html=True)
         partidos = obtener_partidos(categoria, deporte)
         if partidos:
             fechas_dict = {}
             for p in partidos:
                 fechas_dict.setdefault(p[1][:10], []).append(p)
             for j_idx, fch in enumerate(sorted(fechas_dict.keys())):
-                st.markdown(f"""<div style="background:{T()['bgs']};border-left:4px solid {T()['ac']};
-                     padding:8px 16px;margin:14px 0 6px;border-radius:0 6px 6px 0;
-                     display:flex;align-items:center;gap:12px;">
-                  <span style="background:{T()['ac']};color:{T()['bfg']};padding:2px 10px;
+                st.markdown(f"""
+                <div style="background:{T()['bgs']};border-left:4px solid {T()['ac']};
+                     padding:8px 14px;margin:14px 0 8px;border-radius:0 6px 6px 0;
+                     display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                  <span style="background:{T()['ac']};color:{T()['bfg']};padding:3px 10px;
                         border-radius:20px;font-size:0.75rem;font-weight:700;">J{j_idx+1}</span>
-                  <span style="color:{T()['ac']};font-weight:700;">JORNADA {j_idx+1}</span>
-                  <span style="color:{T()['tx3']};font-size:0.85rem;">📅 {fch}</span>
+                  <span style="color:{T()['ac']};font-weight:700;font-size:0.9rem;">JORNADA {j_idx+1}</span>
+                  <span style="color:{T()['tx3']};font-size:0.82rem;">📅 {fch}</span>
                 </div>""", unsafe_allow_html=True)
                 for pid, fecha, enf, estado, g1, g2 in fechas_dict[fch]:
-                    st.markdown(card_partido(enf_limpio(enf), fecha[11:16] or "15:00", estado, g1, g2), unsafe_allow_html=True)
+                    st.markdown(
+                        card_partido(enf_limpio(enf), fecha[11:16] or "15:00", estado, g1, g2),
+                        unsafe_allow_html=True
+                    )
         else:
-            st.info("Sin partidos. Usa el Panel de Gestión → Sorteo para generar el fixture.")
+            st.info("Sin partidos. Usa el Panel de Gestión → 🎲 Sorteo para generar el fixture.")
 
+    # EQUIPOS ───────────────────────────────────────────────────────────────────
     with vista[2]:
-        st.markdown(f"<h3 style='color:{T()['tx']};margin-bottom:12px;'>👥 {deporte} · {categoria}</h3>", unsafe_allow_html=True)
         equipos_dep = obtener_equipos(categoria, deporte)
         if equipos_dep:
-            cols = st.columns(2)
+            cols = st.columns(2, gap="small")
             for idx_col, (cur, eqs) in enumerate(sorted(equipos_dep.items())):
                 if not eqs: continue
                 with cols[idx_col % 2]:
-                    st.markdown(f"""<div style="background:{T()['bgc']};border-top:3px solid {T()['ac']};
-                         border-radius:8px 8px 0 0;padding:10px 16px;">
-                      <span style="font-size:0.7rem;font-weight:700;letter-spacing:2px;color:{T()['tx3']};">CURSO {cur}</span>
+                    st.markdown(f"""
+                    <div style="background:{T()['bgc']};border-top:3px solid {T()['ac']};
+                         border-radius:8px 8px 0 0;padding:9px 14px;">
+                      <span style="font-size:0.68rem;font-weight:700;letter-spacing:2px;
+                                   color:{T()['tx3']};text-transform:uppercase;">CURSO {cur}</span>
                     </div>""", unsafe_allow_html=True)
                     for eq in eqs:
                         jugs = obtener_jugadores(categoria, deporte, cur, eq)
-                        nombres_txt = ", ".join(j["nombre"] for j in jugs) if jugs else ""
-                        st.markdown(f"""<div style="background:{T()['bgc']};border-left:1px solid {T()['bga']};
-                             border-right:1px solid {T()['bga']};border-bottom:1px solid {T()['bga']};padding:10px 16px;">
-                          <div style="display:flex;align-items:center;gap:8px;">
+                        nombres = ", ".join(j["nombre"] for j in jugs) if jugs else ""
+                        st.markdown(f"""
+                        <div style="background:{T()['bgc']};border:1px solid {T()['bga']};
+                             border-top:none;padding:10px 14px;">
+                          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                             <span>⚽</span>
-                            <span style="font-weight:700;color:{T()['tx']};font-size:0.95rem;">{eq}</span>
-                            <span style="background:{T()['ac']};color:{T()['bfg']};padding:1px 8px;
+                            <span style="font-weight:700;color:{T()['tx']};font-size:0.9rem;">{eq}</span>
+                            <span style="background:{T()['ac']};color:{T()['bfg']};padding:2px 8px;
                                   border-radius:20px;font-size:0.7rem;font-weight:700;">{len(jugs)} jug.</span>
                           </div>
-                          {f'<div style="color:{T()["tx3"]};font-size:0.78rem;margin-top:4px;padding-left:24px;">{nombres_txt}</div>' if nombres_txt else ''}
+                          {f'<div style="color:{T()["tx3"]};font-size:0.75rem;margin-top:4px;padding-left:26px;line-height:1.4;">{nombres}</div>' if nombres else ''}
                         </div>""", unsafe_allow_html=True)
-                    st.markdown(f'<div style="background:{T()["bgc"]};border-radius:0 0 8px 8px;height:8px;border:1px solid {T()["bga"]};border-top:none;margin-bottom:12px;"></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div style="background:{T()["bgc"]};border-radius:0 0 8px 8px;height:6px;border:1px solid {T()["bga"]};border-top:none;margin-bottom:10px;"></div>',
+                                unsafe_allow_html=True)
         else:
             st.info("Sin equipos registrados para este deporte.")
